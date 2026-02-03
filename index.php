@@ -1,8 +1,9 @@
 <?php
 /**
- * SP Global Tournament Proxy
+ * SP Global API Proxy
  *
- * Прокси-сервер для глобального доступа к турнирам.
+ * Прокси-сервер для глобального доступа к API.
+ * Поддерживает: турниры (/tournament/*) и друзья (/friends/*)
  * Все запросы перенаправляются на мастер-сервер (spanalytic.ru).
  */
 
@@ -17,8 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// Master server URL
-$RF_SERVER = getenv('RF_SERVER_URL') ?: 'https://spanalytic.ru/api/tournament';
+// Master server base URL
+$RF_SERVER_BASE = 'https://spanalytic.ru/api';
 
 // Get request path
 $requestUri = $_SERVER['REQUEST_URI'];
@@ -28,8 +29,18 @@ $path = parse_url($requestUri, PHP_URL_PATH);
 $path = preg_replace('#^/?(index\.php)?#', '', $path);
 $path = ltrim($path, '/');
 
-// Build target URL
-$targetUrl = $RF_SERVER . '/' . $path;
+// Determine target API based on path
+// /friends/* -> spanalytic.ru/api/friends/*
+// /tournament/* or anything else -> spanalytic.ru/api/tournament/*
+if (strpos($path, 'friends') === 0) {
+    // Friends API
+    $targetUrl = $RF_SERVER_BASE . '/' . $path;
+} else {
+    // Tournament API (default)
+    // Remove 'tournament/' prefix if present to avoid double path
+    $path = preg_replace('#^tournament/?#', '', $path);
+    $targetUrl = $RF_SERVER_BASE . '/tournament/' . $path;
+}
 
 // Forward query string
 if (!empty($_SERVER['QUERY_STRING'])) {
@@ -76,7 +87,8 @@ if ($error) {
     http_response_code(502);
     echo json_encode([
         'success' => false,
-        'error' => 'Proxy error: ' . $error
+        'error' => 'Proxy error: ' . $error,
+        'target_url' => $targetUrl
     ]);
     exit;
 }
