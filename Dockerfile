@@ -15,7 +15,10 @@ COPY . /var/www/html/
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html
 
-# Expose port
-EXPOSE 80
+# Configure Apache to use PORT environment variable (required by Render)
+RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
+
+# Expose port (Render uses PORT env var)
+EXPOSE 10000
 
 CMD ["apache2-foreground"]
