@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: sp-global-api
+    env: docker
+    dockerfilePath: ./Dockerfile
+    region: frankfurt # Центральная Европа - хороший пинг для всех
+    plan: free
+    envVars:
+      - key: RF_SERVER_URL
+        value: https://spanalytic.ru/api/tournament
+      - key: SYNC_SECRET
+        generateValue: true
+    healthCheckPath: /health.php

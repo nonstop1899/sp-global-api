@@ -1,0 +1,6 @@
+RewriteEngine On
+
+# Redirect all requests to index.php except health check
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} !^/health\.php
+RewriteRule ^(.*)$ index.php/$1 [L,QSA]
