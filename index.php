@@ -3,7 +3,7 @@
  * SP Global API Proxy
  *
  * Прокси-сервер для глобального доступа к API.
- * Поддерживает: турниры (/tournament/*) и друзья (/friends/*)
+ * Поддерживает: турниры (/tournament/*), друзья (/friends/*), чат (/chat/*)
  * Все запросы перенаправляются на мастер-сервер (spanalytic.ru).
  */
 
@@ -31,9 +31,13 @@ $path = ltrim($path, '/');
 
 // Determine target API based on path
 // /friends/* -> spanalytic.ru/api/friends/*
+// /chat/* -> spanalytic.ru/api/chat/*
 // /tournament/* or anything else -> spanalytic.ru/api/tournament/*
 if (strpos($path, 'friends') === 0) {
     // Friends API
+    $targetUrl = $RF_SERVER_BASE . '/' . $path;
+} elseif (strpos($path, 'chat') === 0) {
+    // Chat API
     $targetUrl = $RF_SERVER_BASE . '/' . $path;
 } else {
     // Tournament API (default)
